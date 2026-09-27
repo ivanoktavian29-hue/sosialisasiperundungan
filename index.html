@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Duta Ngajeni - Gim Anti-Perundungan SI-PRAMU JOGJA</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for rewards -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#1b365d',
+                            gold: '#c5a059',
+                            goldLight: '#fef8ec',
+                            green: '#10b981',
+                            red: '#ef4444',
+                            purple: '#8b5cf6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(27, 54, 93, 0.1), 0 8px 10px -6px rgba(27, 54, 93, 0.05);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-2px);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px);
+        }
+        .glow-gold {
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.5);
+        }
+        .bg-pattern {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-pattern font-sans text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <header class="bg-brand-blue text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-gold text-brand-blue p-2 rounded-xl font-bold text-xl flex items-center justify-center w-10 h-10 shadow">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        SI-PRAMU JOGJA 
+                        <span class="bg-brand-gold text-xs text-brand-blue font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">SDN Kasihan</span>
+                    </h1>
+                    <p class="text-xs text-slate-300">Gim Edukasi Anti-Perundungan & Penguatan Karakter Kejogjaan</p>
+                </div>
+            </div>
+
+            <!-- Score / Badge Counter -->
+            <div class="flex items-center space-x-3 bg-slate-800/60 px-3 py-1.5 rounded-xl border border-slate-700">
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Poin Ngajeni</div>
+                    <div id="player-score" class="text-base font-extrabold text-brand-gold">0 PTS</div>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div class="flex items-center text-yellow-400 text-lg">
+                    <i class="fa-solid fa-award"></i>
+                    <span id="badge-count" class="text-xs text-white ml-1 font-bold">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <nav class="bg-slate-900/50 border-t border-slate-700/50">
+            <div class="max-w-6xl mx-auto px-4 flex overflow-x-auto space-x-2 py-2 text-sm">
+                <button onclick="switchTab('game-scenario')" id="tab-game-scenario" class="tab-btn px-4 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-brand-gold text-brand-blue transition">
+                    <i class="fa-solid fa-gamepad mr-1.5"></i>Petualangan Duta
+                </button>
+                <button onclick="switchTab('sorting-game')" id="tab-sorting-game" class="tab-btn px-4 py-1.5 rounded-lg font-semibold whitespace-nowrap text-slate-300 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-scale-balanced mr-1.5"></i>Bercanda vs Bully
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-4 py-1.5 rounded-lg font-semibold whitespace-nowrap text-slate-300 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-circle-question mr-1.5"></i>Kuis Kasus
+                </button>
+                <button onclick="switchTab('pledge')" id="tab-pledge" class="tab-btn px-4 py-1.5 rounded-lg font-semibold whitespace-nowrap text-slate-300 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-heart mr-1.5"></i>Ikrar Duta Ngajeni
+                </button>
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-4 py-1.5 rounded-lg font-semibold whitespace-nowrap text-slate-300 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-book-open mr-1.5"></i>Materi & Panduan
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-grow">
+
+        <section id="sec-game-scenario" class="tab-content block">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 custom-shadow mb-6">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+                    <div>
+                        <span class="bg-blue-100 text-brand-blue text-xs font-bold px-2.5 py-1 rounded-md uppercase">Petualangan Interaktif</span>
+                        <h2 class="text-2xl font-bold text-slate-800 mt-1">Petualangan Duta Ngajeni SD Kasihan</h2>
+                        <p class="text-sm text-slate-600">Bantu tokoh utama mengambil keputusan bijak berlandaskan nilai <em>Ngajeni, Tepa Slira, Unggah-Ungguh</em>, dan <em>Ora Mingkuh</em>.</p>
+                    </div>
+                    <div id="scenario-progress" class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">
+                        Misi 1 dari 5
+                    </div>
+                </div>
+
+                <!-- Game Canvas Box -->
+                <div id="game-card" class="bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-xl p-5 border border-blue-100 transition-all">
+                    <!-- Scenario Graphic Header -->
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div id="scenario-icon" class="w-12 h-12 rounded-2xl bg-brand-blue text-brand-gold flex items-center justify-center text-xl shadow">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <div>
+                            <span id="scenario-category" class="text-xs font-bold text-brand-gold uppercase tracking-wider">Kategori Peristiwa</span>
+                            <h3 id="scenario-title" class="text-lg font-bold text-slate-800">Judul Misi</h3>
+                        </div>
+                    </div>
+
+                    <!-- Story Text Box -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-5 text-sm text-slate-700 leading-relaxed" id="scenario-description">
+                        Deskripsi cerita akan dimuat di sini...
+                    </div>
+
+                    <!-- Choices Container -->
+                    <div id="choices-container" class="space-y-3">
+                        <!-- Choice buttons will be injected dynamically -->
+                    </div>
+
+                    <!-- Feedback Box (Hidden initially) -->
+                    <div id="scenario-feedback" class="hidden mt-5 p-4 rounded-xl border text-sm animate-fade-in">
+                        <div class="flex items-start space-x-3">
+                            <div id="feedback-icon" class="text-2xl mt-0.5"></div>
+                            <div>
+                                <h4 id="feedback-title" class="font-bold text-base mb-1"></h4>
+                                <p id="feedback-text" class="text-slate-700 leading-relaxed"></p>
+                                <div id="kejogjaan-note" class="mt-2 text-xs font-semibold bg-white/70 p-2 rounded border border-slate-200 text-brand-blue"></div>
+                                <button onclick="nextScenario()" class="mt-4 bg-brand-blue hover:bg-slate-800 text-white font-bold px-5 py-2 rounded-lg text-sm transition btn-bounce shadow">
+                                    Lanjutkan Misi <i class="fa-solid fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-sorting-game" class="tab-content hidden">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 custom-shadow mb-6">
+                <div class="mb-4 pb-3 border-b border-slate-100">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md uppercase">Refleksi Sikap</span>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-1">Gim Pemilah: Bercanda atau Perundungan?</h2>
+                    <p class="text-sm text-slate-600">Sering kali perundungan dianggap "sekadar bercanda". Klasifikasikan setiap situasi di bawah ini ke dalam kategori yang tepat!</p>
+                </div>
+
+                <!-- Sorting Deck -->
+                <div class="max-w-xl mx-auto mb-6 text-center">
+                    <div id="sorting-card" class="bg-amber-50 border-2 border-amber-200 p-6 rounded-2xl shadow-sm min-h-[160px] flex flex-col justify-center items-center relative transition-all">
+                        <div class="text-3xl text-amber-500 mb-2"><i class="fa-solid fa-quote-left"></i></div>
+                        <p id="sorting-text" class="text-base font-bold text-slate-800 mb-2">Memuat situasi...</p>
+                        <span id="sorting-hint" class="text-xs text-slate-500 italic">Klik tombol keputusan di bawah untuk memilah:</span>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <button onclick="evaluateSorting('BERCANDA')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow transition btn-bounce flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-face-smile text-lg"></i>
+                            <span>Bercanda Sehat</span>
+                        </button>
+                        <button onclick="evaluateSorting('PERUNDUNGAN')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 px-4 rounded-xl shadow transition btn-bounce flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-hand-lines text-lg"></i>
+                            <span>Perundungan (Menyakiti)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sorting Scoreboard -->
+                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 max-w-xl mx-auto text-center text-xs font-semibold">
+                    <div class="text-emerald-700">
+                        <i class="fa-solid fa-circle-check"></i> Benar: <span id="sorting-correct" class="text-sm font-bold">0</span>
+                    </div>
+                    <div class="text-red-600">
+                        <i class="fa-solid fa-circle-xmark"></i> Perlu Refleksi: <span id="sorting-wrong" class="text-sm font-bold">0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-quiz" class="tab-content hidden">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 custom-shadow mb-6">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                    <div>
+                        <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-md uppercase">Evaluasi Pemahaman</span>
+                        <h2 class="text-2xl font-bold text-slate-800 mt-1">Kuis Studi Kasus Anti-Perundungan</h2>
+                        <p class="text-sm text-slate-600">Uji pemahamanmu mengenai penanganan kasus perundungan, etika digital, dan nilai Kejogjaan.</p>
+                    </div>
+                    <div id="quiz-progress-text" class="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-200">
+                        Soal 1 dari 5
+                    </div>
+                </div>
+
+                <div id="quiz-box" class="max-w-2xl mx-auto bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <h3 id="quiz-question" class="text-base font-bold text-slate-800 mb-4">Pertanyaan akan dimuat...</h3>
+                    <div id="quiz-options" class="space-y-2.5">
+                        <!-- Options injected via JS -->
+                    </div>
+                    <div id="quiz-explanation" class="hidden mt-4 p-4 rounded-xl border text-sm">
+                        <!-- Explanation injected via JS -->
+                        <button onclick="nextQuizQuestion()" class="mt-3 bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition">
+                            Soal Berikutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-pledge" class="tab-content hidden">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 custom-shadow mb-6">
+                <div class="text-center max-w-2xl mx-auto mb-6">
+                    <div class="w-16 h-16 bg-brand-goldLight text-brand-gold border-2 border-brand-gold rounded-full flex items-center justify-center text-3xl mx-auto mb-3 shadow">
+                        <i class="fa-solid fa-feather-pointed"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">Dinding Ikrar Duta Ngajeni</h2>
+                    <p class="text-sm text-slate-600">Tuliskan janji dirimu untuk saling menghormati, menghentikan ejekan, dan menjadi pelindung teman di sekolah maupun ruang digital.</p>
+                </div>
+
+                <!-- Form Pledge -->
+                <div class="max-w-md mx-auto bg-slate-50 p-5 rounded-xl border border-slate-200 mb-8">
+                    <form id="pledge-form" onsubmit="addPledge(event)">
+                        <div class="mb-3">
+                            <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">Nama Murid / Duta</label>
+                            <input type="text" id="pledge-name" required placeholder="Contoh: Budi (Kelas 5B)" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none">
+                        </div>
+                        <div class="mb-3">
+                            <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">Nilai Komitmen Utama</label>
+                            <select id="pledge-value" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none">
+                                <option value="Ngajeni">Ngajeni (Saling Menghormati & Santun)</option>
+                                <option value="Tepa Slira">Tepa Slira (Tenggang Rasa & Empati)</option>
+                                <option value="Unggah-Ungguh">Unggah-Ungguh (Tata Krama Bahasa & Perilaku)</option>
+                                <option value="Ora Mingkuh">Ora Mingkuh (Tanggung Jawab & Pantang Menyerah)</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">Pernyataan Janji / Komitmen</label>
+                            <textarea id="pledge-text" required rows="2" placeholder="Contoh: Saya berjanji tidak akan pernah menertawakan teman yang salah berbicara krama dan selalu siap membantu teman." class="w-full text-sm p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-brand-blue hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-sm transition btn-bounce shadow">
+                            <i class="fa-solid fa-paper-plane mr-2"></i>Kirimkan Ikrar SAYA
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Stream of Pledges -->
+                <div class="border-t border-slate-200 pt-6">
+                    <h3 class="text-base font-bold text-slate-800 mb-4 text-center">Komitmen Duta Ngajeni Terdaftar</h3>
+                    <div id="pledges-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-dashboard" class="tab-content hidden">
+            <div class="space-y-6">
+                <!-- Info Banner -->
+                <div class="bg-gradient-to-r from-brand-blue to-slate-800 text-white p-6 rounded-2xl shadow-md border-b-4 border-brand-gold">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <span class="bg-brand-gold text-brand-blue text-xs font-extrabold px-3 py-1 rounded-full uppercase">Praktik Baik GTK Bantul 2026</span>
+                            <h2 class="text-2xl font-bold mt-2">Mengenal Program SI-PRAMU JOGJA</h2>
+                            <p class="text-xs md:text-sm text-slate-200 max-w-2xl mt-1 leading-relaxed">
+                                <strong>Sistem Pembiasaan Karakter Mulia Berbasis Pendidikan Khas Kejogjaan</strong> — Mengintegrasikan 7 Kebiasaan Anak Indonesia Hebat (KAIH), Nilai Budaya Kejogjaan (PKJ), dan Pencegahan Perundungan Berbasis Kemitraan Digital.
+                            </p>
+                        </div>
+                        <div class="bg-white/10 p-3 rounded-xl border border-white/20 text-center min-w-[140px]">
+                            <div class="text-2xl font-extrabold text-brand-gold">15 JP</div>
+                            <div class="text-[10px] text-slate-300 uppercase font-semibold">Kokurikuler "NGAJENI"</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3 Pillars Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- Pillar 1 -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-brand-blue flex items-center justify-center font-bold text-lg mb-3">
+                            <i class="fa-solid fa-heart"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base mb-2">7 Kebiasaan (KAIH)</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">Panduan habit harian anak Indonesia hebat: Bangun pagi, beribadah, berolahraga, makan sehat, gemar membaca, bermasyarakat, dan tidur teratur.</p>
+                        <div class="text-[11px] bg-blue-50 text-blue-800 p-2 rounded-lg font-semibold border border-blue-100">
+                            <i class="fa-solid fa-clock mr-1"></i> Jam Bebas Gawai: 18.00–20.00 WIB
+                        </div>
+                    </div>
+
+                    <!-- Pillar 2 -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-lg mb-3">
+                            <i class="fa-solid fa-masks-theater"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base mb-2">Pendidikan Khas Kejogjaan</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">Landasan nilai budaya: <strong>Ngajeni</strong> (menghormati), <strong>Unggah-ungguh</strong> (tata krama krama alus), <strong>Tepa slira</strong> (empati), dan <strong>Ora mingkuh</strong> (pantang menyerah).</p>
+                        <div class="text-[11px] bg-amber-50 text-amber-800 p-2 rounded-lg font-semibold border border-amber-100">
+                            <i class="fa-solid fa-hands-holding-child mr-1"></i> Teladan Basa Krama Alus di Rumah
+                        </div>
+                    </div>
+
+                    <!-- Pillar 3 -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold text-lg mb-3">
+                            <i class="fa-solid fa-hand-fist"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base mb-2">Pencegahan Perundungan</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">Mencegah perundungan verbal, fisik, sosial, dan cyberbullying. Mengubah kebiasaan ejekan yang dianggap bercanda menjadi saling mendukung.</p>
+                        <div class="text-[11px] bg-red-50 text-red-800 p-2 rounded-lg font-semibold border border-red-100">
+                            <i class="fa-solid fa-bullhorn mr-1"></i> Duta Ngajeni & Pelaporan Aman
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matrix Section -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells text-brand-gold"></i>
+                        Matriks Integrasi Nilai Anti-Perundungan SI-PRAMU JOGJA
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase tracking-wider border-b border-slate-200">
+                                    <th class="p-3">Area Fokus</th>
+                                    <th class="p-3">Nilai Kejogjaan</th>
+                                    <th class="p-3">Pembiasaan Nyata</th>
+                                    <th class="p-3">Aksi Anti-Perundungan</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold">Disiplin & Gawai</td>
+                                    <td class="p-3 text-brand-blue font-semibold">Tertib, Tanggung Jawab</td>
+                                    <td class="p-3">Jadwal Harian & Jam Bebas Gawai (18.00-20.00)</td>
+                                    <td class="p-3 text-slate-600">Mengurangi konflik digital & ruang hangat interaksi keluarga.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold">Ibadah & Sikap</td>
+                                    <td class="p-3 text-brand-blue font-semibold">Ngajeni, Tepa Slira</td>
+                                    <td class="p-3">Menghormati orang lain & santun bertutur</td>
+                                    <td class="p-3 text-slate-600">Menahan kata-kata merendahkan/julukan yang menyakiti.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold">Belajar Mandiri</td>
+                                    <td class="p-3 text-brand-blue font-semibold">Ora Mingkuh</td>
+                                    <td class="p-3">Mandiri, ulet, dan pantang menyerah</td>
+                                    <td class="p-3 text-slate-600">Tidak mengejek teman yang belum memahami pelajaran.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold">Bermasyarakat</td>
+                                    <td class="p-3 text-brand-blue font-semibold">Unggah-Ungguh, Krama Alus</td>
+                                    <td class="p-3">Berbicara sopan & mendengarkan lawan bicara</td>
+                                    <td class="p-3 text-slate-600">Mencegah pengucilan kelompok; merangkul semua teman.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold">Teknologi</td>
+                                    <td class="p-3 text-brand-blue font-semibold">Tanggung Jawab, Waspada</td>
+                                    <td class="p-3">Bijak menggunakan HP & media sosial</td>
+                                    <td class="p-3 text-slate-600">Mengenali & menolak cyberbullying atau sebar rumor.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-8">
+        <div class="max-w-6xl mx-auto px-4 text-center space-y-2">
+            <p class="font-semibold text-slate-300">SI-PRAMU JOGJA — SD Negeri Kasihan, Bantul (2026)</p>
+            <p>Dikembangkan oleh Ninin Sahkori, S.Pd. | Apresiasi Guru Inovatif Kabupaten Bantul 2026</p>
+            <p class="text-slate-500">"Pendidikan karakter kuat lahir dari sinergi sekolah, keteladanan orang tua, dan pembiasaan budaya lokal."</p>
+        </div>
+    </footer>
+
+    <script>
+        /* --- STATE MANAGEMENT --- */
+        let playerScore = 0;
+        let badgeCount = 0;
+        let currentScenarioIdx = 0;
+        let currentSortingIdx = 0;
+        let sortingCorrectCount = 0;
+        let sortingWrongCount = 0;
+        let currentQuizIdx = 0;
+        let quizScore = 0;
+
+        /* --- DATA: Scenario Roleplay --- */
+        const scenarios = [
+            {
+                id: 1,
+                title: "Olok-Olok Julukan di Kelas",
+                category: "Perundungan Verbal vs Bercanda",
+                icon: "fa-comments",
+                description: "Saat jam istirahat di Kelas 5B, beberapa teman menertawakan Budi yang tak sengaja menumpahkan air. Seorang teman berteriak, <em>'Dasar Si Ceroboh Gagap!'</em> lalu membuat julukan mengejek itu berulang kali. Budi tertunduk malu.",
+                choices: [
+                    {
+                        text: "A ikut tertawa agar tidak dianggap kaku oleh teman-teman.",
+                        score: 0,
+                        feedbackTitle: "Sikap Kurang Tepat!",
+                        feedbackText: "Ikut tertawa memperparah dampak perundungan verbal. Julukan mengejek yang mempermalukan bukanlah bercanda biasa.",
+                        note: "Nilai Ngajeni: Ngajeni melarang kita mempermalukan atau memberi julukan buruk pada teman."
+                    },
+                    {
+                        text: "Mengingatkan teman dengan sopan: 'Sudah ya teman-teman, tidak usah dipanggil begitu. Yuk kita bantu Budi bersihkan.'",
+                        score: 20,
+                        badge: true,
+                        feedbackTitle: "Pilihan Sangat Tepat! (+20 Poin)",
+                        feedbackText: "Kamu menunjukkan sikap berani dan menjadi Duta Ngajeni sejati! Kamu menghentikan ejekan tanpa kekerasan.",
+                        note: "Nilai Tepa Slira & Ngajeni: Merasakan apa yang dirasakan orang lain dan menghargai perasaannya."
+                    },
+                    {
+                        text: "Diam saja dan pura-pura tidak mendengar karena takut dimusuhi.",
+                        score: 5,
+                        feedbackTitle: "Sikap Pasif (Saksi Diam)",
+                        feedbackText: "Meskipun tidak ikut mengejek, menjadi saksi yang diam membuat pelaku merasa tindakannya dibolehkan.",
+                        note: "Nilai Ora Mingkuh: Berani bertindak benar dan tidak melarikan diri dari tanggung jawab moral."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Grup Whatsapp Kelas & Foto Lucu",
+                category: "Pencegahan Cyberbullying",
+                icon: "fa-mobile-screen-button",
+                description: "Di grup WhatsApp siswa, seorang teman mengunggah foto wajah teman lain yang sedang menguap lebar dengan tambahan teks ejekan. Banyak yang mengirim stiker tertawa.",
+                choices: [
+                    {
+                        text: "Mengunduh foto tersebut lalu membagikannya ke grup lain.",
+                        score: 0,
+                        feedbackTitle: "Sikap Cyberbullying!",
+                        feedbackText: "Menyebarkan foto yang mempermalukan orang lain di ruang digital adalah bentuk perundungan cyberbullying.",
+                        note: "Nilai Tanggung Jawab Digital: Gunakan gawai dengan bijak dan menjaga kehormatan sesama."
+                    },
+                    {
+                        text: "Menulis di grup secara santun: 'Teman-teman, sebaiknya fotonya dihapus ya. Kasihan kalau temannya merasa malu.' lalu melapor ke guru/ortu.",
+                        score: 20,
+                        badge: true,
+                        feedbackTitle: "Langkah Duta Digital! (+20 Poin)",
+                        feedbackText: "Luar biasa! Kamu berani membendung penyebaran konten merendahkan di ruang digital.",
+                        note: "Unggah-Ungguh Digital: Menjaga tata krama dalam mengetik pesan dan berinteraksi di media sosial."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Siswa Belum Lancar Bahasa Krama",
+                category: "Penguatan Bahasa & Unggah-Ungguh",
+                icon: "fa-language",
+                description: "Rani mencoba berbicara bahasa Jawa Krama Alus kepada guru di depan kelas, namun kata-katanya masih bercampur dan terdengar kaku. Beberapa siswa menertawakan aksennya.",
+                choices: [
+                    {
+                        text: "Menertawakan Rani dan membandingkannya dengan dirimu yang lebih lancar.",
+                        score: 0,
+                        feedbackTitle: "Merendahkan Usaha Teman!",
+                        feedbackText: "Menertawakan orang yang sedang belajar akan mematikan semangatnya dan melanggar kesantunan.",
+                        note: "Nilai Kejogjaan: Unggah-ungguh mengajarkan kita mengapresiasi proses belajar orang lain."
+                    },
+                    {
+                        text: "Tepuk tangan memberi apresiasi atas keberanian Rani, lalu mengajaknya belajar krama bersama setelah kelas.",
+                        score: 20,
+                        badge: true,
+                        feedbackTitle: "Tindakan Terpuji Duta Ngajeni! (+20 Poin)",
+                        feedbackText: "Hebat! Kamu menerapkan semangat saling mendukung dan tidak mengejek kemajuan teman.",
+                        note: "Ora Mingkuh & Ngajeni: Saling menguatkan karakter mulia tanpa merasa paling serba bisa."
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "Pengucilan Saat Kerja Kelompok",
+                category: "Perundungan Sosial / Relasional",
+                icon: "fa-users-slash",
+                description: "Saat pembagian kelompok belajar, Andi yang pemalu tidak diajak oleh kelompok mana pun. Seorang ketua kelompok berbisik, 'Jangan ajak Andi, dia lambat membaca.'",
+                choices: [
+                    {
+                        text: "Mengajak Andi bergabung ke kelompokmu dan membagikan tugas sesuai kemampuannya.",
+                        score: 20,
+                        badge: true,
+                        feedbackTitle: "Sikap Inklusif Luar Biasa! (+20 Poin)",
+                        feedbackText: "Kamu mencegah perundungan sosial (pengucilan). Setiap murid memiliki hak sama untuk belajar bersama.",
+                        note: "Tepa Slira: Merangkul dan tidak membiarkan teman merasa terasingkan di kelas."
+                    },
+                    {
+                        text: "Membiarkan Andi duduk sendiri sampai guru yang menentukan.",
+                        score: 5,
+                        feedbackTitle: "Sikap Acuh Tak Acuh",
+                        feedbackText: "Cobalah untuk peka terhadap kebaikan kelas tanpa menunggu selalu diperintah guru.",
+                        note: "KAIH Bermasyarakat: Peduli terhadap teman di lingkungan sekitar."
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "Aturan Jam Bebas Gawai (18.00-20.00 WIB)",
+                category: "Disiplin KAIH & Pendampingan Orang Tua",
+                icon: "fa-clock",
+                description: "Pukul 18.30 WIB adalah Jam Bebas Gawai SI-PRAMU JOGJA. Temanmu mengajak main game online Moba bersama secara mendadak.",
+                choices: [
+                    {
+                        text: "Langsung buka game dan bermain sampai malam karena takut ditinggal teman.",
+                        score: 0,
+                        feedbackTitle: "Melanggar Kesepakatan Program",
+                        feedbackText: "Waktu 18.00-20.00 adalah waktu khusus belajar, ibadah, dan interaksi hangat keluarga tanpa layar.",
+                        note: "Disiplin KAIH: Belajar mematuhi komitmen harian yang telah disepakati bersama orang tua."
+                    },
+                    {
+                        text: "Menolak halus: 'Maaf ya bro, sekarang Jam Bebas Gawai SI-PRAMU JOGJA. Kita mabar besok sore saja ya setelah belajar.'",
+                        score: 20,
+                        badge: true,
+                        feedbackTitle: "Anak Indonesia Hebat! (+20 Poin)",
+                        feedbackText: "Luar biasa! Kamu bisa konsisten membagi waktu dan berani berkata 'tidak' untuk hal kurang tepat.",
+                        note: "Tertib & Ora Mingkuh: Teguh memegang prinsip disiplin waktu."
+                    }
+                ]
+            }
+        ];
+
+        /* --- DATA: Sorting Game Items --- */
+        const sortingItems = [
+            { text: "Memanggil teman dengan nama julukan fisik yang membuat dia menangis atau menunduk.", type: "PERUNDUNGAN" },
+            { text: "Tertawa bersama saat menonton pertunjukan sulap komedi di sekolah.", type: "BERCANDA" },
+            { text: "Menyembunyikan tas teman sampai dia panik dan menertawakannya ramai-ramai.", type: "PERUNDUNGAN" },
+            { text: "Saling melempar tebak-tebakan lucu di waktu istirahat dan semua tersenyum gembira.", type: "BERCANDA" },
+            { text: "Mengirim stiker berisi editan foto teman yang dibuat jelek ke grup WA kelas.", type: "PERUNDUNGAN" },
+            { text: "Mengingatkan teman yang lupa memakai kaos kaki dengan bisikan sopan agar tidak malu.", type: "BERCANDA" },
+            { text: "Membuat kesepakatan untuk tidak menyapa seorang teman selama satu minggu penuh.", type: "PERUNDUNGAN" }
+        ];
+
+        /* --- DATA: Quiz Questions --- */
+        const quizQuestions = [
+            {
+                question: "Apa arti utama dari nilai Kejogjaan 'NGAJENI' dalam pencegahan perundungan?",
+                options: [
+                    "A. Menghormati dan menghargai harkat orang lain dalam perbuatan, ucapan, dan digital.",
+                    "B. Selalu ingin menang sendiri saat berdiskusi di kelas.",
+                    "C. Mengabaikan teman yang sedang kesulitan belajar.",
+                    "D. Memberikan barang mahal kepada teman kelas."
+                ],
+                correct: 0,
+                explanation: "Ngajeni berarti saling menghormati dan menghargai. Nilai ini menjadi benteng utama agar murid tidak saling merendahkan atau mengejek."
+            },
+            {
+                question: "Manakah tindakan yang BENAR jika kamu menjadi saksi (bystander) aksi ejekan perundungan di kelas?",
+                options: [
+                    "A. Merekam video lalu menyebarkannya di media sosial.",
+                    "B. Mendorong teman lain untuk ikut menertawakan.",
+                    "C. Menunjukkan empati, menegur dengan santun/mencari bantuan guru atau orang tua.",
+                    "D. Pura-pura tidak tahu dan meninggalkan tempat kejadian."
+                ],
+                correct: 2,
+                explanation: "Saksi yang bijak adalah saksi yang berani membela teman secara baik atau melaporkan situasi tersebut kepada orang dewasa yang tepercaya."
+            },
+            {
+                question: "Pukul berapakah kesepakatan 'Jam Bebas Gawai' dalam program SI-PRAMU JOGJA?",
+                options: [
+                    "A. Pukul 12.00 – 14.00 WIB",
+                    "B. Pukul 18.00 – 20.00 WIB",
+                    "C. Pukul 21.00 – 23.00 WIB",
+                    "D. Pukul 06.00 – 08.00 WIB"
+                ],
+                correct: 1,
+                explanation: "Jam Bebas Gawai ditetapkan pukul 18.00-20.00 WIB agar anak fokus pada belajar, ibadah, dan berkomunikasi dengan keluarga."
+            },
+            {
+                question: "Bagaimana cara membedakan antara 'Bercanda Sehat' dan 'Perundungan'?",
+                options: [
+                    "A. Jika ada pihak yang merasa terluka, malu, tertekan, atau dilakukan berulang, itu Perundungan.",
+                    "B. Semua tindakan sama saja, tidak ada bedanya.",
+                    "C. Kalau pelakunya bilang 'cuma bercanda', berarti pasti bukan perundungan.",
+                    "D. Perundungan hanya terjadi jika ada pukulan fisik saja."
+                ],
+                correct: 0,
+                explanation: "Perundungan tidak selalu berbentuk fisik. Jika ucapan/tindakan membuat seseorang merasa disakiti atau dip pojokkan, itu adalah perundungan."
+            },
+            {
+                question: "Penggunaan bahasa Jawa Krama Alus kepada orang tua dan guru merupakan wujud dari nilai...",
+                options: [
+                    "A. Tepa Slira",
+                    "B. Unggah-Ungguh",
+                    "C. Ora Mingkuh",
+                    "D. Kerja Keras"
+                ],
+                correct: 1,
+                explanation: "Unggah-ungguh mencakup tata krama kesantunan berbahasa dan bertindak sopan santun kepada yang lebih tua maupun sesama."
+            }
+        ];
+
+        /* --- INITIAL PLEDGES DATA --- */
+        let pledges = [
+            { name: "Siti Rahma (Kelas 5B)", value: "Ngajeni", text: "Saya berjanji tidak akan pernah memberi nama julukan buruk kepada teman-teman." },
+            { name: "Dimas Perkasa (Kelas 5B)", value: "Tepa Slira", text: "Saya akan selalu mengajak teman yang belum dapat kelompok saat belajar bersama." },
+            { name: "Ninin Sahkori (Guru)", value: "Unggah-Ungguh", text: "Siap mendampingi dan mendengarkan setiap curhatan murid dengan penuh kasih sayang." }
+        ];
+
+        window.onload = function() {
+            renderScenario();
+            renderSortingCard();
+            renderQuiz();
+            renderPledges();
+        };
+
+        /* TAB NAVIGATION LOGIC */
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-brand-gold', 'text-brand-blue');
+                el.classList.add('text-slate-300');
+            });
+
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('bg-brand-gold', 'text-brand-blue');
+            activeBtn.classList.remove('text-slate-300');
+        }
+
+        /* --- GAME 1: SCENARIO ROLEPLAY LOGIC --- */
+        function renderScenario() {
+            const sc = scenarios[currentScenarioIdx];
+            document.getElementById('scenario-progress').innerText = `Misi ${currentScenarioIdx + 1} dari ${scenarios.length}`;
+            document.getElementById('scenario-category').innerText = sc.category;
+            document.getElementById('scenario-title').innerText = sc.title;
+            document.getElementById('scenario-description').innerHTML = sc.description;
+            document.getElementById('scenario-icon').innerHTML = `<i class="fa-solid ${sc.icon}"></i>`;
+
+            const choicesBox = document.getElementById('choices-container');
+            choicesBox.innerHTML = '';
+
+            sc.choices.forEach((choice, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium transition shadow-sm btn-bounce flex items-start gap-2.5";
+                btn.onclick = () => selectChoice(choice);
+                btn.innerHTML = `<span class="bg-blue-50 text-brand-blue font-bold w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 mt-0.5">${idx+1}</span> <span>${choice.text}</span>`;
+                choicesBox.appendChild(btn);
+            });
+
+            document.getElementById('scenario-feedback').classList.add('hidden');
+        }
+
+        function selectChoice(choice) {
+            playerScore += choice.score;
+            if (choice.badge) badgeCount++;
+            
+            updateHeaderStats();
+
+            const feedbackBox = document.getElementById('scenario-feedback');
+            const iconBox = document.getElementById('feedback-icon');
+            const titleBox = document.getElementById('feedback-title');
+            const textBox = document.getElementById('feedback-text');
+            const noteBox = document.getElementById('kejogjaan-note');
+
+            if (choice.score >= 15) {
+                feedbackBox.className = "mt-5 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 animate-fade-in";
+                iconBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+                confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
+            } else {
+                feedbackBox.className = "mt-5 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900 animate-fade-in";
+                iconBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i>`;
+            }
+
+            titleBox.innerText = choice.feedbackTitle;
+            textBox.innerText = choice.feedbackText;
+            noteBox.innerText = choice.note;
+
+            feedbackBox.classList.remove('hidden');
+            // Disable choices after selecting
+            document.getElementById('choices-container').querySelectorAll('button').forEach(b => b.disabled = true);
+        }
+
+        function nextScenario() {
+            if (currentScenarioIdx < scenarios.length - 1) {
+                currentScenarioIdx++;
+                renderScenario();
+            } else {
+                alert(`Selamat! Kamu telah menyelesaikan seluruh Misi Petualangan Duta Ngajeni!\nSkor Akhirmu: ${playerScore} PTS`);
+                currentScenarioIdx = 0;
+                renderScenario();
+            }
+        }
+
+        /* --- GAME 2: SORTING GAME LOGIC --- */
+        function renderSortingCard() {
+            if (currentSortingIdx >= sortingItems.length) {
+                document.getElementById('sorting-card').innerHTML = `
+                    <div class="text-2xl text-emerald-600 font-bold mb-2"><i class="fa-solid fa-trophy"></i> Selesai!</div>
+                    <p class="text-sm text-slate-700">Kamu telah memilah seluruh situasi dengan baik. Mari terus terapkan di kehidupan nyata!</p>
+                `;
+                return;
+            }
+            const item = sortingItems[currentSortingIdx];
+            document.getElementById('sorting-text').innerText = `"${item.text}"`;
+        }
+
+        function evaluateSorting(userChoice) {
+            if (currentSortingIdx >= sortingItems.length) return;
+
+            const item = sortingItems[currentSortingIdx];
+            if (userChoice === item.type) {
+                sortingCorrectCount++;
+                playerScore += 10;
+                confetti({ particleCount: 20, spread: 40, origin: { y: 0.7 } });
+            } else {
+                sortingWrongCount++;
+            }
+
+            document.getElementById('sorting-correct').innerText = sortingCorrectCount;
+            document.getElementById('sorting-wrong').innerText = sortingWrongCount;
+            updateHeaderStats();
+
+            currentSortingIdx++;
+            renderSortingCard();
+        }
+
+        /* --- GAME 3: QUIZ LOGIC --- */
+        function renderQuiz() {
+            const q = quizQuestions[currentQuizIdx];
+            document.getElementById('quiz-progress-text').innerText = `Soal ${currentQuizIdx + 1} dari ${quizQuestions.length}`;
+            document.getElementById('quiz-question').innerText = q.question;
+
+            const optionsBox = document.getElementById('quiz-options');
+            optionsBox.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3 rounded-lg border border-slate-200 bg-white hover:bg-purple-50 text-xs font-semibold text-slate-700 transition flex items-center justify-between";
+                btn.onclick = () => answerQuiz(idx);
+                btn.innerText = opt;
+                optionsBox.appendChild(btn);
+            });
+
+            document.getElementById('quiz-explanation').classList.add('hidden');
+        }
+
+        function answerQuiz(selectedIdx) {
+            const q = quizQuestions[currentQuizIdx];
+            const expBox = document.getElementById('quiz-explanation');
+
+            if (selectedIdx === q.correct) {
+                quizScore += 20;
+                playerScore += 15;
+                expBox.className = "mt-4 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs leading-relaxed";
+                expBox.innerHTML = `<strong><i class="fa-solid fa-circle-check"></i> Jawaban Benar!</strong><p class="mt-1">${q.explanation}</p>`;
+            } else {
+                expBox.className = "mt-4 p-4 rounded-xl border border-red-200 bg-red-50 text-red-900 text-xs leading-relaxed";
+                expBox.innerHTML = `<strong><i class="fa-solid fa-circle-xmark"></i> Jawaban Kurang Tepat.</strong><p class="mt-1">${q.explanation}</p>`;
+            }
+
+            updateHeaderStats();
+            expBox.innerHTML += `<button onclick="nextQuizQuestion()" class="mt-3 bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Soal Berikutnya <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+            expBox.classList.remove('hidden');
+
+            document.getElementById('quiz-options').querySelectorAll('button').forEach(b => b.disabled = true);
+        }
+
+        function nextQuizQuestion() {
+            if (currentQuizIdx < quizQuestions.length - 1) {
+                currentQuizIdx++;
+                renderQuiz();
+            } else {
+                alert(`Kuis Selesai! Skor Kuis Pemahamanmu: ${quizScore}/100`);
+                currentQuizIdx = 0;
+                quizScore = 0;
+                renderQuiz();
+            }
+        }
+
+        /* --- GAME 4: PLEDGE WALL LOGIC --- */
+        function addPledge(e) {
+            e.preventDefault();
+            const name = document.getElementById('pledge-name').value;
+            const value = document.getElementById('pledge-value').value;
+            const text = document.getElementById('pledge-text').value;
+
+            pledges.unshift({ name, value, text });
+            renderPledges();
+
+            playerScore += 25;
+            badgeCount++;
+            updateHeaderStats();
+
+            document.getElementById('pledge-form').reset();
+            confetti({ particleCount: 60, spread: 80, origin: { y: 0.6 } });
+        }
+
+        function renderPledges() {
+            const grid = document.getElementById('pledges-grid');
+            grid.innerHTML = '';
+
+            pledges.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm relative hover:border-brand-gold transition";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] font-bold uppercase bg-brand-gold/20 text-brand-blue px-2 py-0.5 rounded">${p.value}</span>
+                        <i class="fa-solid fa-certificate text-brand-gold text-xs"></i>
+                    </div>
+                    <p class="text-xs text-slate-700 italic mb-3">"${p.text}"</p>
+                    <div class="text-xs font-bold text-slate-800 border-t border-slate-200 pt-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-shield text-brand-blue"></i> ${p.name}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* --- HELPER FUNCTIONS --- */
+        function updateHeaderStats() {
+            document.getElementById('player-score').innerText = `${playerScore} PTS`;
+            document.getElementById('badge-count').innerText = badgeCount;
+        }
+    </script>
+</body>
+</html>
